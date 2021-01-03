@@ -1,0 +1,9 @@
+torch>=1.7.1
+torchvision>=0.8.2
+torchaudio>=0.7.2
+-f https://download.pytorch.org/whl/torch_stable.html
+numpy>=1.18.4
+pandas>=0.24.2
+tqdm>=4.48.2
+pydub>=0.24.1
+soundfile>=0.10.3
