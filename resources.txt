@@ -1,1 +1,4 @@
 Convert mp3 to wav - https://stackoverflow.com/questions/3049572/how-to-convert-mp3-to-wav-in-python
+PyTorch Documentation - https://pytorch.org/docs/stable/index.html
+PyTorch Lightning Documentation - https://pytorch-lightning.readthedocs.io/en/latest/index.html
+tqdm with multiprocessing pool - https://stackoverflow.com/questions/41920124/multiprocessing-use-tqdm-to-display-a-progress-bar
