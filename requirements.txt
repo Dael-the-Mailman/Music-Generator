@@ -7,3 +7,4 @@ pandas>=0.24.2
 tqdm>=4.48.2
 pydub>=0.24.1
 soundfile>=0.10.3
+optuna>=2.3.0

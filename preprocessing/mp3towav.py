@@ -1,3 +1,10 @@
+"""
+Converts .mp3 files into .wav files
+
+Arguments: 
+-i, --input: Specify the folder where the .mp3 files are stored in
+-o, --output: Specify the folder where the .wav files are to be stored in
+"""
 import os
 import re
 import pydub

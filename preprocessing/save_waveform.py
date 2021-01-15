@@ -1,3 +1,8 @@
+"""
+Saves the waveform of the song in one second long chunks
+
+NOTE: Abandoned due to large file size
+"""
 import os
 import re
 import torch
@@ -14,6 +19,7 @@ OUT_PATH = "E:/datasets/youtube/audiotensors"
 FIXED_SR = 44100 # Default Sample Rate
 
 # Couldn't make multiprocessed 😭😭😭
+# Keeps crashing when I do
 songs = os.listdir(IN_PATH)
 for song in tqdm(songs):
     song_path = os.path.join(IN_PATH, song)
