@@ -1,6 +1,6 @@
 # Music Generator Project
 
-## Codename: Loftimus Prime
+## Codename: Loftimus Prime 😎
 
 ![Project Image](project-image-url)
 
