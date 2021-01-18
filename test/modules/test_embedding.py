@@ -5,6 +5,10 @@ import torchaudio
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.append('../../')
+from modules.patch_embed import *
+
 torchaudio.USE_SOUNDFILE_LEGACY_INTERFACE = False
 torchaudio.set_audio_backend("soundfile")
 
@@ -30,9 +34,14 @@ def fill_spec(spec):
 # new_spec = einops.rearrange(new_spec, 'd h (w s) -> d h w s', w=221)
 # print(new_spec.shape)
 new_spec = fill_spec(specgram)
+new_spec = einops.rearrange(new_spec, 'd h w s -> s d h w')
 print(new_spec.shape)
-print(torch.nn.functional.interpolate(new_spec, size=(2,224,224,new_spec.shape[3])).shape)
+# print(torch.nn.functional.interpolate(new_spec, size=(2,224,224,new_spec.shape[3])).shape)
 
+embed = PatchEmbedding()
+out = embed(new_spec)
+
+print(out.shape)
 # plt.figure()
 # plt.imshow(new_spec[0,:,:,0], cmap='gist_heat')
 # plt.show()

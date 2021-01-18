@@ -4,7 +4,7 @@ https://arxiv.org/pdf/1706.03762.pdf
 
 Code is modified from https://github.com/wzlxjtu/PositionalEncoding2D
 
-NOTE: Intended shape (2, 201, 221, 360)
+NOTE: Intended shape (song_duration, 1846, 360)
 """
 import torch
 import torch.nn
