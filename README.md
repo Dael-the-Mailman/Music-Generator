@@ -30,6 +30,7 @@ Creates original lofi songs from scratch. Trained using lofi music from youtube 
 - PyTorch
 - Pydub
 - NumPy
+- Einops 🧠🧠🧠
 
 ## Architecture:
 

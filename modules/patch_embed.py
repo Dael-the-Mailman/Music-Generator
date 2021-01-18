@@ -4,6 +4,8 @@ Implementation of patch embedding
 Code modified from:
 https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632
 
+Input shape: (1, song_duration, 2, 201, 221)
+
 :param depth: the number of audio channels
 :patch_size: size of convolution and stride
 :padding: resize/pad the convolution so that it is evenly divisible
@@ -17,7 +19,7 @@ from einops.layers.torch import Rearrange
 from einops import repeat
 
 class PatchEmbedding(nn.Module):
-    def __init__(self, depth=2, patch_size=5, padding=2, embed_size=360):
+    def __init__(self, embed_size, depth=2, patch_size=5, padding=2):
         self.patch_size = patch_size
         self.padding = padding
         self.embed_size = embed_size
@@ -33,6 +35,7 @@ class PatchEmbedding(nn.Module):
         self.cls_tokens = nn.Parameter(torch.randn(1,1,embed_size))
 
     def forward(self, x):
+        x = x.squeeze(0)
         b, _, h, w = x.shape
         x = self.projection(x)
 

@@ -3,3 +3,4 @@ PyTorch Documentation - https://pytorch.org/docs/stable/index.html
 PyTorch Lightning Documentation - https://pytorch-lightning.readthedocs.io/en/latest/index.html
 Command Line Arguments - https://www.tutorialspoint.com/python/python_command_line_arguments.htm
 Positional Encoder Code - https://github.com/wzlxjtu/PositionalEncoding2D
+Visual transformer - https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632

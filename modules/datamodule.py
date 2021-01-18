@@ -1,5 +1,7 @@
 """
 Created a LightningDataModule to load the spectrogram and waveform
+
+:param path: path to folder containing train, valid, and test folders
 """
 import os
 import einops
