@@ -2,6 +2,7 @@
 Created a LightningDataModule to load the spectrogram and waveform
 """
 import os
+import einops
 import torch
 import torchaudio
 import numpy as np
@@ -25,8 +26,11 @@ class TrainDataset(Dataset):
         song_path = os.path.join(self.path, self.songs[index])
         waveform, _ = torchaudio.load(song_path)
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-                # input , target
-        return [specgram, waveform]
+        duration = specgram.shape[2]//221 + 1
+        new_length = duration * 221
+        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+                # input                                                          , target
+        return [einops.rearrange(out, 'd h (w s) -> d h w s', w=221).unsqueeze(0), waveform]
 
 class ValidDataset(Dataset):
     def __init__(self, path):
@@ -40,8 +44,11 @@ class ValidDataset(Dataset):
         song_path = os.path.join(self.path, self.songs[index])
         waveform, _ = torchaudio.load(song_path)
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-                # input , target
-        return [specgram, waveform]
+        duration = specgram.shape[2]//221 + 1
+        new_length = duration * 221
+        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+                # input                                                          , target
+        return [einops.rearrange(out, 'd h (w s) -> d h w s', w=221).unsqueeze(0), waveform]
 
 class TestDataset(Dataset):
     def __init__(self, path):
@@ -55,8 +62,11 @@ class TestDataset(Dataset):
         song_path = os.path.join(self.path, self.songs[index])
         waveform, _ = torchaudio.load(song_path)
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-                # input , target
-        return [specgram, waveform]
+        duration = specgram.shape[2]//221 + 1
+        new_length = duration * 221
+        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+                # input                                                          , target
+        return [einops.rearrange(out, 'd h (w s) -> d h w s', w=221).unsqueeze(0), waveform]
 
 class LofiDataModule(LightningDataModule):
     def __init__(self, path, batch_size=1):
@@ -65,12 +75,12 @@ class LofiDataModule(LightningDataModule):
     
     def train_dataloader(self):
         train_split = TrainDataset(path)
-        return DataLoader(train_split, batch_size=batch_size)
+        return DataLoader(train_split, batch_size=self.batch_size)
     
     def val_dataloader(self):
         val_split = ValidDataset(path)
-        return DataLoader(val_split, batch_size=batch_size)
+        return DataLoader(val_split, batch_size=self.batch_size)
     
     def test_dataloader(self):
         test_split = TestDataset(path)
-        return DataLoader(test_split, batch_size=batch_size)
+        return DataLoader(test_split, batch_size=self.batch_size)
