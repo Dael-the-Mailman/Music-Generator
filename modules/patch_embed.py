@@ -19,7 +19,7 @@ from einops.layers.torch import Rearrange
 from einops import repeat
 
 class PatchEmbedding(nn.Module):
-    def __init__(self, embed_size, depth=2, patch_size=5, padding=2):
+    def __init__(self, embed_size=360, depth=2, patch_size=5, padding=2):
         self.patch_size = patch_size
         self.padding = padding
         self.embed_size = embed_size

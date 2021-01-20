@@ -38,7 +38,7 @@ new_spec = einops.rearrange(new_spec, 'd h w s -> s d h w').unsqueeze(0)
 print(new_spec.shape)
 # print(torch.nn.functional.interpolate(new_spec, size=(2,224,224,new_spec.shape[3])).shape)
 
-embed = PatchEmbedding()
+embed = PatchEmbedding(360)
 out = embed(new_spec)
 
 print(out.shape)

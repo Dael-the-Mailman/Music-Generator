@@ -26,13 +26,19 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, index):
         song_path = os.path.join(self.path, self.songs[index])
+        # waveform calculations
         waveform, _ = torchaudio.load(song_path)
+        duration = waveform.shape[1]//44100 + 1
+        new_length = 44100*duration
+        wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+
+        # spectrogram calculations
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-        duration = specgram.shape[2]//221 + 1
+        # duration = specgram.shape[2]//221 + 1
         new_length = duration * 221
-        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-                # input                                                          , target
-        return [einops.rearrange(out, 'd h (w s) -> s d h w', w=221), waveform]
+        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
+                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
         # return [specgram, waveform]
 
 class ValidDataset(Dataset):
@@ -45,13 +51,19 @@ class ValidDataset(Dataset):
     
     def __getitem__(self, index):
         song_path = os.path.join(self.path, self.songs[index])
+        # waveform calculations
         waveform, _ = torchaudio.load(song_path)
+        duration = waveform.shape[1]//44100 + 1
+        new_length = 44100*duration
+        wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+
+        # spectrogram calculations
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-        duration = specgram.shape[2]//221 + 1
+        # duration = specgram.shape[2]//221 + 1
         new_length = duration * 221
-        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-                # input                                             , target
-        return [einops.rearrange(out, 'd h (w s) -> s d h w', w=221), waveform]
+        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
+                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
         # return [specgram, waveform]
 
 class TestDataset(Dataset):
@@ -64,13 +76,19 @@ class TestDataset(Dataset):
     
     def __getitem__(self, index):
         song_path = os.path.join(self.path, self.songs[index])
+        # waveform calculations
         waveform, _ = torchaudio.load(song_path)
+        duration = waveform.shape[1]//44100 + 1
+        new_length = 44100*duration
+        wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+
+        # spectrogram calculations
         specgram = torchaudio.transforms.Spectrogram()(waveform)
-        duration = specgram.shape[2]//221 + 1
+        # duration = specgram.shape[2]//221 + 1
         new_length = duration * 221
-        out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-                # input                                             , target
-        return [einops.rearrange(out, 'd h (w s) -> s d h w', w=221), waveform]
+        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
+        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
+                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
         # return [specgram, waveform]
 
 class LofiDataModule(LightningDataModule):
