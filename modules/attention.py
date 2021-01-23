@@ -12,14 +12,14 @@ import torch.nn.functional as F
 from einops import rearrange
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, emb_size=360, num_heads=8, dropout=0.1):
+    def __init__(self, emb_size=360, num_heads=8, drop_p=0.1):
         super().__init__()
         self.emb_size = emb_size
         self.num_heads = num_heads
         self.keys = nn.Linear(emb_size, emb_size)
         self.queries = nn.Linear(emb_size, emb_size)
         self.values = nn.Linear(emb_size, emb_size)
-        self.att_drop = nn.Dropout(dropout)
+        self.att_drop = nn.Dropout(drop_p)
         self.projection = nn.Linear(emb_size, emb_size)
 
     def forward(self, x, mask=None):
