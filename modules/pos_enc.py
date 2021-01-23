@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 
 class PositionalEncoder(nn.Module):
-    def __init__(self, embed_size=360, dropout=0.5, depth=2, height=201, width=221):
+    def __init__(self, embed_size=360, dropout=0.1, depth=2, height=201, width=221):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.embed_size = embed_size
