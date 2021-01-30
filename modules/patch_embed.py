@@ -14,7 +14,7 @@ Input shape: (1, song_duration, 2, 201, 221)
 :poolpad: resize/pad the pooling so that it is evenly divisible
           by the
 
-TODO: TODO make more robust position parameters
+TODO: make more robust position parameters
 """
 import torch
 import torch.nn as nn
