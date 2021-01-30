@@ -4,3 +4,4 @@ PyTorch Lightning Documentation - https://pytorch-lightning.readthedocs.io/en/la
 Command Line Arguments - https://www.tutorialspoint.com/python/python_command_line_arguments.htm
 Positional Encoder Code - https://github.com/wzlxjtu/PositionalEncoding2D
 Visual transformer - https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632
+Wasserstein GAN - https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/GANs/4.%20WGAN-GP

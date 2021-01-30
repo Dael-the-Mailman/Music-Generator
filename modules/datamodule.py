@@ -33,11 +33,11 @@ class TrainDataset(Dataset):
         wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
 
         # spectrogram calculations
-        specgram = torchaudio.transforms.Spectrogram()(waveform)
-        # duration = specgram.shape[2]//221 + 1
-        new_length = duration * 221
-        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
+        specgram = torchaudio.transforms.MelSpectrogram()(waveform)
+        duration = specgram.shape[2]//128 + 1
+        new_length = duration * 128
+        spec_out = torch.cat((specgram, torch.zeros(2,128,new_length-specgram.shape[2])),2)
+        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=128), 
                 einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
         # return [specgram, waveform]
 
