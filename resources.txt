@@ -5,3 +5,4 @@ Command Line Arguments - https://www.tutorialspoint.com/python/python_command_li
 Positional Encoder Code - https://github.com/wzlxjtu/PositionalEncoding2D
 Visual transformer - https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632
 Wasserstein GAN - https://github.com/aladdinpersson/Machine-Learning-Collection/tree/master/ML/Pytorch/GANs/4.%20WGAN-GP
+Train multiple optimizers - https://github.com/aniketmaurya/pytorch-gans/blob/main/DCGAN/dcgan_lightning.ipynb

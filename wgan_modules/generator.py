@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 class Generator(nn.Sequential):
-    def __init__(self, channels_noise=100, channels_audio=2, features_g=16):
+    def __init__(self, channels_noise=100, channels=2, features_g=16):
         super().__init__(
             # Input N x channels_noise x 1 x 1
             self._block(channels_noise, features_g * 16, 4, 1, 0),  # 4x4
@@ -17,7 +17,7 @@ class Generator(nn.Sequential):
             self._block(features_g * 2, features_g, 4, 2, 1),  # 64x64
             # Turns 64x64 -> 128x128
             nn.ConvTranspose2d(
-                features_g, channels_audio, kernel_size=4, stride=2, padding=1
+                features_g, channels, kernel_size=4, stride=2, padding=1
             ),
             nn.ReLU()
         )

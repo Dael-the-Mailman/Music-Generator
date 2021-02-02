@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 class Critic(nn.Sequential):
-    def __init__(self, channels=2, features_d=16):
+    def __init__(self, channels, features_d):
         super().__init__(
             # Input: Seconds x channels x 128 x 128
             nn.Conv2d(channels, features_d, kernel_size=4, stride=2, padding=1),
@@ -26,5 +26,5 @@ class Critic(nn.Sequential):
                 in_channels, out_channels, kernel_size, stride, padding, bias=False,
             ),
             nn.InstanceNorm2d(out_channels, affine=True),
-            nn.LeakyReLU(0.2),
+            nn.GELU(),
         )
