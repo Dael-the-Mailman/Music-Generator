@@ -13,7 +13,7 @@ from modules.datamodule import TrainDataset
 from wgan_modules.critic import Critic
 
 train_dl = DataLoader(TrainDataset('E:/datasets/youtube/wavfiles'), batch_size=1)
-critic = Critic()
+critic = Critic(2, 16)
 
 for i, (src, _) in tqdm(enumerate(train_dl)):
     out = critic(src.squeeze(0))

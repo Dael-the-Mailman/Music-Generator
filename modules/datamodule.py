@@ -31,15 +31,9 @@ class TrainDataset(Dataset):
         duration = waveform.shape[1]//44100 + 1
         new_length = 44100*duration
         wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+        wave_out = einops.rearrange(wave_out, "c (t s) -> t c s", s=44100)
 
-        # spectrogram calculations
-        specgram = torchaudio.transforms.MelSpectrogram()(waveform)
-        duration = specgram.shape[2]//128 + 1
-        new_length = duration * 128
-        spec_out = torch.cat((specgram, torch.zeros(2,128,new_length-specgram.shape[2])),2)
-        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=128), 
-                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
-        # return [specgram, waveform]
+        return [wave_out[:-1], wave_out[1:]]
 
 class ValidDataset(Dataset):
     def __init__(self, path):
@@ -56,15 +50,9 @@ class ValidDataset(Dataset):
         duration = waveform.shape[1]//44100 + 1
         new_length = 44100*duration
         wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+        wave_out = einops.rearrange(wave_out, "c (t s) -> t c s", s=44100)
 
-        # spectrogram calculations
-        specgram = torchaudio.transforms.Spectrogram()(waveform)
-        # duration = specgram.shape[2]//221 + 1
-        new_length = duration * 221
-        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
-                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
-        # return [specgram, waveform]
+        return [wave_out[:-1], wave_out[1:]]
 
 class TestDataset(Dataset):
     def __init__(self, path):
@@ -81,15 +69,9 @@ class TestDataset(Dataset):
         duration = waveform.shape[1]//44100 + 1
         new_length = 44100*duration
         wave_out = torch.cat((waveform, torch.zeros(2,new_length-waveform.shape[1])),1)
+        wave_out = einops.rearrange(wave_out, "c (t s) -> t c s", s=44100)
 
-        # spectrogram calculations
-        specgram = torchaudio.transforms.Spectrogram()(waveform)
-        # duration = specgram.shape[2]//221 + 1
-        new_length = duration * 221
-        spec_out = torch.cat((specgram, torch.zeros(2,201,new_length-specgram.shape[2])),2)
-        return [einops.rearrange(spec_out, 'd h (w s) -> s d h w', w=221), 
-                einops.rearrange(wave_out, 'd (w s) -> s d w', w=44100)]
-        # return [specgram, waveform]
+        return [wave_out[:-1], wave_out[1:]]
 
 class LofiDataModule(LightningDataModule):
     def __init__(self, path):
