@@ -79,13 +79,13 @@ class LofiDataModule(LightningDataModule):
         self.path = path
     
     def train_dataloader(self):
-        train_split = TrainDataset(path)
+        train_split = TrainDataset(self.path)
         return DataLoader(train_split)
     
     def val_dataloader(self):
-        val_split = ValidDataset(path)
+        val_split = ValidDataset(self.path)
         return DataLoader(val_split)
     
     def test_dataloader(self):
-        test_split = TestDataset(path)
+        test_split = TestDataset(self.path)
         return DataLoader(test_split)
