@@ -44,8 +44,8 @@ opt_critic = optim.Adam(critic.parameters(), lr=LEARNING_RATE, betas=(0.0, 0.9))
 # scaler = amp.GradScaler()
 
 fixed_noise = torch.randn(32, Z_DIM, 1, 1).to(device)
-writer_real = SummaryWriter(f"logs/AudioGAN/real")
-writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
+# writer_real = SummaryWriter(f"logs/AudioGAN/real")
+# writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
 step = 0
 
 gen.train()
@@ -76,6 +76,10 @@ for epoch in range(NUM_EPOCHS):
     for batch_idx, (real, _) in tqdm(enumerate(loader)):
         real = torch.from_numpy(np.stack(real)).to(device)
         cur_batch_size = real.shape[0]
+
+        if cur_batch_size > 200:
+            print('Song too large')
+            continue
 
         # Train Critic: max E[critic(real)] - E[critic(fake)]
         # equivalent to minimizing the negative of that
