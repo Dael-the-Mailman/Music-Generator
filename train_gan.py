@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.cuda.amp as amp
+import torchvision
 import numpy as np
 
 from tqdm import tqdm
@@ -40,11 +41,11 @@ initialize_weights(critic)
 
 opt_gen  = optim.Adam(gen.parameters(), lr=LEARNING_RATE, betas=(0.0, 0.9))
 opt_critic = optim.Adam(critic.parameters(), lr=LEARNING_RATE, betas=(0.0, 0.9))
-scaler = amp.GradScaler()
+# scaler = amp.GradScaler()
 
 fixed_noise = torch.randn(32, Z_DIM, 1, 1).to(device)
-# writer_real = SummaryWriter(f"logs/AudioGAN/real")
-# writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
+writer_real = SummaryWriter(f"logs/AudioGAN/real")
+writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
 step = 0
 
 gen.train()
@@ -72,15 +73,13 @@ def gradient_penalty(critic, real, fake, device="cpu"):
     return gradient_penalty
 
 for epoch in range(NUM_EPOCHS):
-    # Target labels not needed! <3 unsupervised
-    for batch_idx, (real, _) in enumerate(loader):
+    for batch_idx, (real, _) in tqdm(enumerate(loader)):
         real = torch.from_numpy(np.stack(real)).to(device)
         cur_batch_size = real.shape[0]
 
         # Train Critic: max E[critic(real)] - E[critic(fake)]
         # equivalent to minimizing the negative of that
         for _ in range(CRITIC_ITERATIONS):
-            print(cur_batch_size)
             noise = torch.randn(cur_batch_size, Z_DIM, 1, 1).to(device)
             fake = gen(noise)
             critic_real = critic(real).reshape(-1)
@@ -107,13 +106,13 @@ for epoch in range(NUM_EPOCHS):
                   Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
             )
 
-            # with torch.no_grad():
-            #     fake = gen(fixed_noise)
-            #     # take out (up to) 32 examples
-            #     img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
-            #     img_grid_fake = torchvision.utils.make_grid(fake[:32], normalize=True)
+            with torch.no_grad():
+                fake = gen(fixed_noise)
+                # take out (up to) 32 examples
+                img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
+                img_grid_fake = torchvision.utils.make_grid(fake[:32], normalize=True)
 
-            #     writer_real.add_image("Real", img_grid_real, global_step=step)
-            #     writer_fake.add_image("Fake", img_grid_fake, global_step=step)
+                writer_real.add_image("Real", img_grid_real, global_step=step)
+                writer_fake.add_image("Fake", img_grid_fake, global_step=step)
 
             step += 1
