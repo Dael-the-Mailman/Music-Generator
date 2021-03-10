@@ -20,7 +20,7 @@ class Generator(nn.Module):
                 features_g * 2, audio_channels, kernel_size=4, stride=2, padding=1
             ),
             # Output: N x channels_img x 64 x 64
-            nn.Tanh(),
+            # nn.Tanh(),
         )
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):

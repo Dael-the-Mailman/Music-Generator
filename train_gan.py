@@ -44,8 +44,8 @@ opt_critic = optim.Adam(critic.parameters(), lr=LEARNING_RATE, betas=(0.0, 0.9))
 # scaler = amp.GradScaler()
 
 fixed_noise = torch.randn(32, Z_DIM, 1, 1).to(device)
-# writer_real = SummaryWriter(f"logs/AudioGAN/real")
-# writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
+writer_real = SummaryWriter(f"logs/AudioGAN/real")
+writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
 step = 0
 
 gen.train()
