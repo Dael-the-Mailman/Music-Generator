@@ -13,7 +13,7 @@ class Critic(nn.Module):
         self.disc = nn.Sequential(
             # input: N x channels_img x 64 x 64
             nn.Conv2d(audio_channels, features_d, kernel_size=4, stride=2, padding=1),
-            nn.LeakyReLU(0.2),
+            nn.PReLU(),
             # _block(in_channels, out_channels, kernel_size, stride, padding)
             self._block(features_d, features_d * 2, 4, 2, 1),
             self._block(features_d * 2, features_d * 4, 4, 2, 1),

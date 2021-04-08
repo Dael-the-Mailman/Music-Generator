@@ -11,7 +11,7 @@ import sys
 sys.path.append('../../')
 from wgan_modules.generator import Generator
 
-fixed_noise = torch.randn(64, 100, 1)
-gen = Generator(100, 2, 16)
+fixed_noise = torch.randn(32, 100, 1, 1)
+gen = Generator(100, 1, 16)
 out = gen(fixed_noise)
 print(out.shape)

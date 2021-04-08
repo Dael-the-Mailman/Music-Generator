@@ -16,10 +16,10 @@ class Generator(nn.Module):
             self._block(features_g * 16, features_g * 8, 4, 2, 1),  # img: 8x8
             self._block(features_g * 8, features_g * 4, 4, 2, 1),  # img: 16x16
             self._block(features_g * 4, features_g * 2, 4, 2, 1),  # img: 32x32
+            # Output: N x channels_img x 64 x 64
             nn.ConvTranspose2d(
                 features_g * 2, audio_channels, kernel_size=4, stride=2, padding=1
             ),
-            # Output: N x channels_img x 64 x 64
             # nn.Tanh(),
         )
 

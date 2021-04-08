@@ -5,6 +5,7 @@ import torch.optim as optim
 import torch.cuda.amp as amp
 import torchvision
 import numpy as np
+import pandas as pd
 
 from tqdm import tqdm
 from wgan_modules.critic import Critic
@@ -32,7 +33,7 @@ FEATURES_GEN = 16
 CRITIC_ITERATIONS = 5
 LAMBDA_GP = 10
 
-loader = DataLoader(TrainSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE), shuffle=True)
+loader = DataLoader(TrainSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE), shuffle=False)
 
 gen = Generator(Z_DIM, AUDIO_CHANNELS, FEATURES_GEN).to(device)
 critic = Critic(AUDIO_CHANNELS, FEATURES_CRITIC).to(device)
@@ -44,8 +45,8 @@ opt_critic = optim.Adam(critic.parameters(), lr=LEARNING_RATE, betas=(0.0, 0.9))
 # scaler = amp.GradScaler()
 
 fixed_noise = torch.randn(32, Z_DIM, 1, 1).to(device)
-writer_real = SummaryWriter(f"logs/AudioGAN/real")
-writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
+# writer_real = SummaryWriter(f"logs/AudioGAN/real")
+# writer_fake = SummaryWriter(f"logs/AudioGAN/fake")
 step = 0
 
 gen.train()
@@ -72,6 +73,33 @@ def gradient_penalty(critic, real, fake, device="cpu"):
     gradient_penalty = torch.mean((gradient_norm - 1) ** 2)
     return gradient_penalty
 
+def train(critic, opt_critic, gen, opt_gen, real, cur_batch_size, Z_DIM, device):
+    # Train Critic: max E[critic(real)] - E[critic(fake)]
+    # equivalent to minimizing the negative of that
+    for _ in range(CRITIC_ITERATIONS):
+        noise = torch.randn(cur_batch_size, Z_DIM, 1, 1).to(device)
+        fake = gen(noise)
+        critic_real = critic(real).reshape(-1)
+        critic_fake = critic(fake).reshape(-1)
+        gp = gradient_penalty(critic, real, fake, device=device)
+        loss_critic = (
+            -(torch.mean(critic_real) - torch.mean(critic_fake) + LAMBDA_GP * gp)
+        )
+        critic.zero_grad()
+        loss_critic.backward(retain_graph=True)
+        opt_critic.step()
+    
+    # Train Generator: max E[critic(gen_fake)] <-> min -E[critic(gen_fake)]
+    gen_fake = critic(fake).reshape(-1)
+    loss_gen = -torch.mean(gen_fake)
+    gen.zero_grad()
+    loss_gen.backward()
+    opt_gen.step()
+
+    return loss_critic, loss_gen
+
+history = pd.DataFrame(columns=["index", "loss"])
+
 for epoch in range(NUM_EPOCHS):
     for batch_idx, (real, _) in tqdm(enumerate(loader)):
         real = torch.from_numpy(np.stack(real)).to(device)
@@ -81,42 +109,29 @@ for epoch in range(NUM_EPOCHS):
             print('Song too large')
             continue
 
-        # Train Critic: max E[critic(real)] - E[critic(fake)]
-        # equivalent to minimizing the negative of that
-        for _ in range(CRITIC_ITERATIONS):
-            noise = torch.randn(cur_batch_size, Z_DIM, 1, 1).to(device)
-            fake = gen(noise)
-            critic_real = critic(real).reshape(-1)
-            critic_fake = critic(fake).reshape(-1)
-            gp = gradient_penalty(critic, real, fake, device=device)
-            loss_critic = (
-                -(torch.mean(critic_real) - torch.mean(critic_fake)) + LAMBDA_GP * gp
-            )
-            critic.zero_grad()
-            loss_critic.backward(retain_graph=True)
-            opt_critic.step()
+        loss_critic, loss_gen = train(critic, opt_critic, gen, opt_gen, real, cur_batch_size, Z_DIM, device)
 
-        # Train Generator: max E[critic(gen_fake)] <-> min -E[critic(gen_fake)]
-        gen_fake = critic(fake).reshape(-1)
-        loss_gen = -torch.mean(gen_fake)
-        gen.zero_grad()
-        loss_gen.backward()
-        opt_gen.step()
+        print(
+            f"Epoch [{epoch}/{NUM_EPOCHS}] Batch {batch_idx}/{len(loader)} \
+              Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
+        )
+
+        history = history.append({"index": batch_idx, "loss": loss_gen.item()}, ignore_index=True)
 
         # Print losses occasionally and print to tensorboard
-        if batch_idx % 100 == 0 and batch_idx > 0:
-            print(
-                f"Epoch [{epoch}/{NUM_EPOCHS}] Batch {batch_idx}/{len(loader)} \
-                  Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
-            )
+        # if batch_idx % 100 == 0 and batch_idx > 0:
+        #     print(
+        #         f"Epoch [{epoch}/{NUM_EPOCHS}] Batch {batch_idx}/{len(loader)} \
+        #           Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
+        #     )
 
-            with torch.no_grad():
-                fake = gen(fixed_noise)
-                # take out (up to) 32 examples
-                img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
-                img_grid_fake = torchvision.utils.make_grid(fake[:32], normalize=True)
+        #     with torch.no_grad():
+        #         fake = gen(fixed_noise)
+        #         # take out (up to) 32 examples
+        #         img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
+        #         img_grid_fake = torchvision.utils.make_grid(fake[:32], normalize=True)
 
-                writer_real.add_image("Real", img_grid_real, global_step=step)
-                writer_fake.add_image("Fake", img_grid_fake, global_step=step)
+        #         writer_real.add_image("Real", img_grid_real, global_step=step)
+        #         writer_fake.add_image("Fake", img_grid_fake, global_step=step)
 
-            step += 1
+        #     step += 1

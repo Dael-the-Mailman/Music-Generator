@@ -18,7 +18,7 @@ torchaudio.USE_SOUNDFILE_LEGACY_INTERFACE = False
 torchaudio.set_audio_backend("soundfile")
 
 class TrainSpecLoader(Dataset):
-    def __init__(self, path, n_mels=256):
+    def __init__(self, path, n_mels=128):
         self.path = os.path.join(path,'train')
         self.songs = os.listdir(self.path)
         self.n_mels = n_mels
@@ -39,7 +39,7 @@ class TrainSpecLoader(Dataset):
             yield arr[:, i:i+chunk_size]
 
 class ValidSpecLoader(Dataset):
-    def __init__(self, path, n_mels=256):
+    def __init__(self, path, n_mels=128):
         self.path = os.path.join(path,'valid')
         self.songs = os.listdir(self.path)
         self.n_mels = n_mels
@@ -60,7 +60,7 @@ class ValidSpecLoader(Dataset):
             yield arr[:, i:i+chunk_size]
 
 class TestSpecLoader(Dataset):
-    def __init__(self, path, n_mels=256):
+    def __init__(self, path, n_mels=128):
         self.path = os.path.join(path,'test')
         self.songs = os.listdir(self.path)
         self.n_mels = n_mels
