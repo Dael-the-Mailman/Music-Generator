@@ -10,7 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 from wgan_modules.critic import Critic
 from wgan_modules.generator import Generator
-from modules.datamodule import TrainSpecLoader
+from modules.datamodule import TrainSpecLoader, TestSpecLoader
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -32,8 +32,9 @@ FEATURES_CRITIC = 16
 FEATURES_GEN = 16
 CRITIC_ITERATIONS = 5
 LAMBDA_GP = 10
+PROPORTION = 0.25
 
-loader = DataLoader(TrainSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE), shuffle=False)
+loader = DataLoader(TestSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE), shuffle=False)
 
 gen = Generator(Z_DIM, AUDIO_CHANNELS, FEATURES_GEN).to(device)
 critic = Critic(AUDIO_CHANNELS, FEATURES_CRITIC).to(device)
@@ -116,8 +117,11 @@ for epoch in range(NUM_EPOCHS):
               Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
         )
 
-        history = history.append({"index": batch_idx, "loss": loss_gen.item()}, ignore_index=True)
+        history = history.append({"index": batch_idx, "loss": loss_critic.item()}, ignore_index=True)
 
+    worst_df = history[history["loss"] <= history["loss"].quantile(PROPORTION)]
+    print(worst_df.head())
+    print(worst_df.describe())
         # Print losses occasionally and print to tensorboard
         # if batch_idx % 100 == 0 and batch_idx > 0:
         #     print(
