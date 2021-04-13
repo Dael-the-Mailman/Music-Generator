@@ -34,7 +34,8 @@ CRITIC_ITERATIONS = 5
 LAMBDA_GP = 10
 PROPORTION = 0.25
 
-loader = DataLoader(TestSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE), shuffle=False)
+dataset = TestSpecLoader('E:/datasets/youtube/wavfiles', SPEC_SIZE)
+loader = DataLoader(dataset, shuffle=False)
 
 gen = Generator(Z_DIM, AUDIO_CHANNELS, FEATURES_GEN).to(device)
 critic = Critic(AUDIO_CHANNELS, FEATURES_CRITIC).to(device)
@@ -99,9 +100,8 @@ def train(critic, opt_critic, gen, opt_gen, real, cur_batch_size, Z_DIM, device)
 
     return loss_critic, loss_gen
 
-history = pd.DataFrame(columns=["index", "loss"])
-
 for epoch in range(NUM_EPOCHS):
+    history = pd.DataFrame(columns=["index", "loss"])
     for batch_idx, (real, _) in tqdm(enumerate(loader)):
         real = torch.from_numpy(np.stack(real)).to(device)
         cur_batch_size = real.shape[0]
@@ -120,8 +120,27 @@ for epoch in range(NUM_EPOCHS):
         history = history.append({"index": batch_idx, "loss": loss_critic.item()}, ignore_index=True)
 
     worst_df = history[history["loss"] <= history["loss"].quantile(PROPORTION)]
-    print(worst_df.head())
-    print(worst_df.describe())
+
+    print("\nNow training on worst songs\n")
+    
+    worst_idx = 0
+    for _, row in worst_df.iterrows():
+        idx = int(row['index'])
+        real = torch.from_numpy(np.stack(dataset[idx][0])).unsqueeze(1).to(device)
+        cur_batch_size = real.shape[0]
+        
+        # For redundancy
+        if cur_batch_size > 200:
+            print('Song too large')
+            continue
+
+        loss_critic, loss_gen = train(critic, opt_critic, gen, opt_gen, real, cur_batch_size, Z_DIM, device)
+        
+        print(
+            f"Epoch [{epoch}/{NUM_EPOCHS}] Worst Song {song_idx}/{len(worst_df)} \
+              Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
+        )
+        worst_idx += 1
         # Print losses occasionally and print to tensorboard
         # if batch_idx % 100 == 0 and batch_idx > 0:
         #     print(
