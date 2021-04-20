@@ -20,7 +20,6 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(
                 features_g * 2, audio_channels, kernel_size=4, stride=2, padding=1
             ),
-            # nn.Tanh(),
         )
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):
@@ -29,7 +28,7 @@ class Generator(nn.Module):
                 in_channels, out_channels, kernel_size, stride, padding, bias=False,
             ),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
+            nn.PReLU()
         )
 
     def forward(self, x):

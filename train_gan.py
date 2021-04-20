@@ -6,6 +6,9 @@ import torch.cuda.amp as amp
 import torchvision
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import librosa
+import soundfile
 
 from tqdm import tqdm
 from wgan_modules.critic import Critic
@@ -123,9 +126,9 @@ for epoch in range(NUM_EPOCHS):
 
     print("\nNow training on worst songs\n")
     
-    worst_idx = 0
-    for _, row in worst_df.iterrows():
-        idx = int(row['index'])
+    worst_idx = 1
+    for song_idx, row in worst_df.iterrows():
+        idx = int(song_idx)
         real = torch.from_numpy(np.stack(dataset[idx][0])).unsqueeze(1).to(device)
         cur_batch_size = real.shape[0]
         
@@ -137,7 +140,7 @@ for epoch in range(NUM_EPOCHS):
         loss_critic, loss_gen = train(critic, opt_critic, gen, opt_gen, real, cur_batch_size, Z_DIM, device)
         
         print(
-            f"Epoch [{epoch}/{NUM_EPOCHS}] Worst Song {song_idx}/{len(worst_df)} \
+            f"Epoch [{epoch}/{NUM_EPOCHS}] Worst Song {worst_idx}/{len(worst_df)} \
               Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
         )
         worst_idx += 1
@@ -148,13 +151,27 @@ for epoch in range(NUM_EPOCHS):
         #           Loss D: {loss_critic:.4f}, loss G: {loss_gen:.4f}"
         #     )
 
-        #     with torch.no_grad():
-        #         fake = gen(fixed_noise)
-        #         # take out (up to) 32 examples
-        #         img_grid_real = torchvision.utils.make_grid(real[:32], normalize=True)
-        #         img_grid_fake = torchvision.utils.make_grid(fake[:32], normalize=True)
+    with torch.no_grad():
+        fake = gen(fixed_noise)
+        # take out (up to) 32 examples
+        img_grid_real = torchvision.utils.make_grid(real[:32].cpu()) #, normalize=True)
+        img_grid_fake = torchvision.utils.make_grid(fake[:32].cpu()) #, normalize=True)
 
-        #         writer_real.add_image("Real", img_grid_real, global_step=step)
-        #         writer_fake.add_image("Fake", img_grid_fake, global_step=step)
+        plt.imshow(img_grid_real.log().permute(1,2,0).numpy(), cmap='gist_heat')
+        plt.savefig(f"logs/Epoch {epoch} Real.png")
+        plt.imshow(img_grid_fake.log().permute(1,2,0).numpy(), cmap='gist_heat')
+        plt.savefig(f"logs/Epoch {epoch} Fake.png")
+
+        y_prime = []
+        for chunk in tqdm(fake[:32].cpu().numpy()):
+            out = librosa.feature.inverse.mel_to_audio(chunk.squeeze(0))
+            y_prime.append(out)
+        soundfile.write(f'logs/Epoch {epoch}.wav', np.concatenate(y_prime), 22050)
+        # out = librosa.feature.inverse.mel_to_audio(chunk, sr=sr)
+        # y_prime.append(out)
+        # torchvision.utils.save_image(img_grid_real, f"Epoch {epoch} Real.png")
+        # torchvision.utils.save_image(img_grid_fake, f"Epoch {epoch} Fake.png")
+                # writer_real.add_image("Real", img_grid_real, global_step=step)
+                # writer_fake.add_image("Fake", img_grid_fake, global_step=step)
 
         #     step += 1
