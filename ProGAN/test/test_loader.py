@@ -2,7 +2,7 @@ import os
 from numpy import concatenate
 import torch
 import torchaudio
-from torch.utils.data import Dataset, dataset
+from torch.utils.data import Dataset, DataLoader
 from torchaudio.transforms import MelSpectrogram
 from numpy.random import randint
 # import torchvision.transforms as transforms
@@ -12,10 +12,9 @@ NUM_WORKERS = 4
 
 
 class LofiDataset(Dataset):
-    def __init__(self, path, batch_size, n_mels=128):
+    def __init__(self, path, n_mels=128):
         self.path = path
         self.n_mels = n_mels
-        self.batch_size = batch_size
 
     def __len__(self):
         return len(os.listdir(self.path))
@@ -31,16 +30,24 @@ class LofiDataset(Dataset):
             space_tensor = torch.zeros(
                 (split[0].shape[0], self.n_mels, dead_space))
             split[-1] = torch.cat((split[-1], space_tensor), dim=2)
-        stack = torch.stack(split)
-        return list(torch.split(stack, self.batch_size, dim=0))
+        # stack = torch.stack(split)
+        return split
 
 
-dataset = LofiDataset(PATH, batch_size=32, n_mels=4)
+dataset = LofiDataset(PATH, n_mels=4)
 
 data = dataset[randint(0, len(dataset))]
+loader = DataLoader(
+    dataset,
+    batch_size=32,
+    shuffle=True,
+    num_workers=4,
+    pin_memory=True,
+)
 print(data[0].shape)
 # print(torch.max(data))
 print(len(data))
+
 
 # print(len(dataset))
 # print(dataset[0])
