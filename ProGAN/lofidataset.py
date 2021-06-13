@@ -1,14 +1,8 @@
 import os
-from numpy import concatenate
 import torch
 import torchaudio
-from torch.utils.data import Dataset, dataset
+from torch.utils.data import Dataset
 from torchaudio.transforms import MelSpectrogram
-from numpy.random import randint
-# import torchvision.transforms as transforms
-
-PATH = 'D:\\datasets\\youtube\\all'
-NUM_WORKERS = 4
 
 
 class LofiDataset(Dataset):
@@ -33,14 +27,3 @@ class LofiDataset(Dataset):
             split[-1] = torch.cat((split[-1], space_tensor), dim=2)
         stack = torch.stack(split)
         return list(torch.split(stack, self.batch_size, dim=0))
-
-
-dataset = LofiDataset(PATH, batch_size=32, n_mels=4)
-
-data = dataset[randint(0, len(dataset))]
-print(data[0].shape)
-# print(torch.max(data))
-print(len(data))
-
-# print(len(dataset))
-# print(dataset[0])
