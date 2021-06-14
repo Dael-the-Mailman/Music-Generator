@@ -10,6 +10,7 @@ from utils import (
 from model import Discriminator, Generator
 from math import log2
 from tqdm import tqdm
+from numpy.random import randint
 import config
 from lofidataset import LofiDataset
 
@@ -43,47 +44,45 @@ def train_fn(
 ):
     loop = tqdm(loader, leave=True)
     for batch_idx, song in enumerate(loop):
-        for real in song:
-            real = real.squeeze(0).to(config.DEVICE)
-            cur_batch_size = real.shape[0]
+        real = song[randint(0,len(song))].squeeze(0).to(config.DEVICE)
+        cur_batch_size = real.shape[0]
+        noise = torch.randn(cur_batch_size, config.Z_DIM,
+                            1, 1).to(config.DEVICE)
 
-            noise = torch.randn(cur_batch_size, config.Z_DIM,
-                                1, 1).to(config.DEVICE)
-
-            with torch.cuda.amp.autocast():
-                fake = gen(noise, alpha, step)
-                critic_real = critic(real, alpha, step)
-                critic_fake = critic(fake.detach(), alpha, step)
-                gp = gradient_penalty(critic, real, fake, alpha,
-                                      step, device=config.DEVICE)
-                loss_critic = (
-                    - (torch.mean(critic_real) - torch.mean(critic_fake))
-                    + config.LAMBDA_GP * gp
-                    + (0.001 * torch.mean(critic_real ** 2))
-                )
-
-            opt_critic.zero_grad()
-            scaler_critic.scale(loss_critic).backward()
-            scaler_critic.step(opt_critic)
-            scaler_critic.update()
-
-            with torch.cuda.amp.autocast():
-                gen_fake = critic(fake, alpha, step)
-                loss_gen = -torch.mean(gen_fake)
-
-            opt_gen.zero_grad()
-            scaler_gen.scale(loss_gen).backward()
-            scaler_gen.step(opt_gen)
-            scaler_gen.update()
-
-            alpha += cur_batch_size / \
-                (len(dataset) * config.PROGRESSIVE_EPOCHS[step]*0.5)
-            alpha = min(alpha, 1)
-
-            loop.set_postfix(
-                gp=gp.item(),
-                loss_critic=loss_critic.item()
+        with torch.cuda.amp.autocast():
+            fake = gen(noise, alpha, step)
+            critic_real = critic(real, alpha, step)
+            critic_fake = critic(fake.detach(), alpha, step)
+            gp = gradient_penalty(critic, real, fake, alpha,
+                                  step, device=config.DEVICE)
+            loss_critic = (
+                - (torch.mean(critic_real) - torch.mean(critic_fake))
+                + config.LAMBDA_GP * gp
+                + (0.001 * torch.mean(critic_real ** 2))
             )
+
+        opt_critic.zero_grad()
+        scaler_critic.scale(loss_critic).backward()
+        scaler_critic.step(opt_critic)
+        scaler_critic.update()
+
+        with torch.cuda.amp.autocast():
+            gen_fake = critic(fake, alpha, step)
+            loss_gen = -torch.mean(gen_fake)
+
+        opt_gen.zero_grad()
+        scaler_gen.scale(loss_gen).backward()
+        scaler_gen.step(opt_gen)
+        scaler_gen.update()
+
+        alpha += cur_batch_size / \
+            (len(dataset) * config.PROGRESSIVE_EPOCHS[step]*0.5)
+        alpha = min(alpha, 1)
+
+        loop.set_postfix(
+            gp=gp.item(),
+            loss_critic=loss_critic.item()
+        )
 
     return alpha
 
