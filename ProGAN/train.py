@@ -5,7 +5,7 @@ from utils import (
     gradient_penalty,
     save_checkpoint,
     load_checkpoint,
-    generate_examples
+    audio_examples
 )
 from model import Discriminator, Generator
 from math import log2

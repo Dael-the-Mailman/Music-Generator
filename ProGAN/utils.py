@@ -8,6 +8,7 @@ import config
 from torchvision.utils import save_image
 from scipy.stats import truncnorm
 
+
 def gradient_penalty(critic, real, fake, alpha, train_step, device="cpu"):
     BATCH_SIZE, C, H, W = real.shape
     beta = torch.rand((BATCH_SIZE, 1, 1, 1)).repeat(1, C, H, W).to(device)
@@ -51,6 +52,7 @@ def load_checkpoint(checkpoint_file, model, optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
 
+
 def seed_everything(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
@@ -61,6 +63,7 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
 def generate_examples(gen, steps, truncation=0.7, n=100):
     """
     Tried using truncation trick here but not sure it actually helped anything, you can
@@ -70,7 +73,12 @@ def generate_examples(gen, steps, truncation=0.7, n=100):
     alpha = 1.0
     for i in range(n):
         with torch.no_grad():
-            noise = torch.tensor(truncnorm.rvs(-truncation, truncation, size=(1, config.Z_DIM, 1, 1)), device=config.DEVICE, dtype=torch.float32)
+            noise = torch.tensor(truncnorm.rvs(-truncation, truncation, size=(
+                1, config.Z_DIM, 1, 1)), device=config.DEVICE, dtype=torch.float32)
             img = gen(noise, alpha, steps)
             save_image(img*0.5+0.5, f"saved_examples/img_{i}.png")
     gen.train()
+
+
+def audio_examples(gen, steps):
+    pass
